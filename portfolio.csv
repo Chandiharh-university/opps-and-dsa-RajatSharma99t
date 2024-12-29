@@ -1,0 +1,6 @@
+name,type,amount,cost_price,current_price
+Apple,stock,50.0,120.0,150.0
+Bitcoin,crypto,2.0,30000.0,10000.0
+Tesla,stock,10.0,600.0,700.0
+Tata,stock,5.0,546.0,9222.0
+eth,crypto,5.0,331.0,542.0

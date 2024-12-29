@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investment Portfolio Tracker</title>
+    <!-- Include Bootstrap for styling -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            background-color: #f0f8ff;
+            font-family: Arial, sans-serif;
+        }
+        h1 {
+            text-align: center;
+            color: #004d99;
+        }
+        .table th, .table td {
+            text-align: center;
+        }
+        .card {
+            margin-bottom: 20px;
+        }
+        .container {
+            margin-top: 20px;
+        }
+        .form-group label {
+            font-weight: bold;
+        }
+        .form-control {
+            width: 100%;
+        }
+        .btn {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        .profit {
+            color: green;
+            font-weight: bold;
+        }
+        .loss {
+            color: red;
+            font-weight: bold;
+        }
+        .total-box {
+            background-color: #e0f7fa;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        .table-container {
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Investment Portfolio Tracker</h1>
+
+    <!-- Total Invested, Total Value, and Profit/Loss -->
+    <div class="total-box">
+        <h3>Total Invested: ${{ total_invested }}</h3>
+        <h3>Total Value: ${{ total_value }}</h3>
+        <h3>Profit/Loss: ${{ total_profit_loss }}</h3>
+    </div>
+
+    <!-- Graph Section -->
+    <div class="row">
+        <div class="col-md-6">
+            <h3>Profit/Loss and Investment Overview</h3>
+            <canvas id="investmentChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Existing Portfolio Section -->
+    <div class="table-container">
+        <h3>Existing Portfolio</h3>
+        <form method="POST">
+            <table class="table table-bordered">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Asset Name</th>
+                        <th>Asset Type</th>
+                        <th>Amount</th>
+                        <th>Cost Price</th>
+                        <th>Current Price</th>
+                        <th>Profit/Loss</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for asset in portfolio %}
+                    <tr>
+                        <td><input type="text" name="name" value="{{ asset.name }}" class="form-control"></td>
+                        <td><input type="text" name="type" value="{{ asset.type }}" class="form-control"></td>
+                        <td><input type="number" name="amount" value="{{ asset.amount }}" class="form-control"></td>
+                        <td><input type="number" name="cost_price" value="{{ asset.cost_price }}" class="form-control"></td>
+                        <td><input type="number" name="current_price" value="{{ asset.current_price }}" class="form-control"></td>
+                        <td>
+                            {% set profit_loss = (asset.current_price - asset.cost_price) * asset.amount %}
+                            <span class="{{ 'profit' if profit_loss > 0 else 'loss' }}">
+                                ${{ profit_loss }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <br>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        </form>
+    </div>
+
+    <!-- Add New Asset Section -->
+    <h3>Add New Asset</h3>
+    <form method="POST">
+        <div class="form-group">
+            <label for="new_name">Asset Name:</label>
+            <input type="text" id="new_name" name="new_name" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="new_type">Asset Type:</label>
+            <input type="text" id="new_type" name="new_type" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="new_amount">Amount:</label>
+            <input type="number" id="new_amount" name="new_amount" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="new_cost_price">Cost Price:</label>
+            <input type="number" id="new_cost_price" name="new_cost_price" class="form-control" required>
+        </div>
+        <div class="form-group">
+            <label for="new_current_price">Current Price:</label>
+            <input type="number" id="new_current_price" name="new_current_price" class="form-control" required>
+        </div>
+        <button type="submit" name="add_asset" class="btn btn-primary">Add Asset</button>
+    </form>
+</div>
+
+<!-- Chart.js Script -->
+<script>
+    var ctx = document.getElementById('investmentChart').getContext('2d');
+    var investmentChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: [ {% for asset in portfolio %}"{{ asset.name }}", {% endfor %} ],
+            datasets: [{
+                label: 'Profit/Loss',
+                data: [ {% for asset in portfolio %} {{ (asset.current_price - asset.cost_price) * asset.amount }}, {% endfor %} ],
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1
+            }, {
+                label: 'Total Invested',
+                data: [ {% for asset in portfolio %} {{ asset.amount * asset.cost_price }}, {% endfor %} ],
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
